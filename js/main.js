@@ -20,19 +20,57 @@
     return String(n).padStart(4, '0');
   }
 
+  // Loading every frame of every section at once (5 sections x 76 frames of
+  // decoded image data) is enough memory pressure to make scrolling stall and
+  // can push mobile browsers to silently drop already-decoded images. So we
+  // only ever keep the active section and its two neighbors in memory, and we
+  // trickle each section's requests in through a small queue instead of
+  // firing 76 at once.
+  const MAX_CONCURRENT_LOADS = 8;
+
   function loadSection(section) {
     if (!section || section.loading || section.images.length) return;
     section.loading = true;
-    for (let i = 1; i <= section.frameCount; i++) {
+    section.loadGen = (section.loadGen || 0) + 1;
+    const gen = section.loadGen;
+    const urls = [];
+    for (let i = 1; i <= section.frameCount; i++) urls.push(`${section.frameDir}/${pad(i)}.jpg`);
+    section.images = new Array(urls.length);
+
+    let nextIndex = 0;
+    function loadNext() {
+      if (section.loadGen !== gen || nextIndex >= urls.length) return;
+      const i = nextIndex++;
       const img = new Image();
-      img.src = `${section.frameDir}/${pad(i)}.jpg`;
-      section.images.push(img);
+      img.decoding = 'async';
+      img.onload = img.onerror = loadNext;
+      img.src = urls[i];
+      section.images[i] = img;
     }
+
+    for (let k = 0; k < Math.min(MAX_CONCURRENT_LOADS, urls.length); k++) loadNext();
+  }
+
+  function unloadSection(section) {
+    if (!section) return;
+    section.loadGen = (section.loadGen || 0) + 1; // invalidate any in-flight loader
+    section.images.forEach((img) => {
+      if (img) img.src = '';
+    });
+    section.images = [];
+    section.loading = false;
+  }
+
+  function syncLoadedWindow(centerIndex) {
+    const keep = new Set([centerIndex - 1, centerIndex, centerIndex + 1]);
+    sections.forEach((section, i) => {
+      if (keep.has(i)) loadSection(section);
+      else unloadSection(section);
+    });
   }
 
   // Preload the first section immediately, and prime the next one.
-  loadSection(sections[0]);
-  loadSection(sections[1]);
+  syncLoadedWindow(0);
 
   let dpr = 1;
 
@@ -131,8 +169,7 @@
     if (newActive !== activeIndex) {
       activeIndex = newActive;
       indicatorEls.forEach((btn, i) => btn.classList.toggle('active', i === activeIndex));
-      loadSection(sections[activeIndex]);
-      loadSection(sections[activeIndex + 1]);
+      syncLoadedWindow(activeIndex);
     }
   }
 
