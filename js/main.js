@@ -159,6 +159,96 @@
   }
   update();
 
+  // A normal wheel/trackpad scroll scrubs the video frame-by-frame as usual.
+  // A single fast flick, though, auto-completes the current section's video
+  // (plays it through to its end, or back to its start when flicking up)
+  // instead of just coasting to wherever momentum happens to stop.
+  const FLICK_VELOCITY_THRESHOLD = 1.8; // px/ms of wheel movement to count as a "flick"
+  const FLICK_SAMPLE_WINDOW = 220; // ms of recent wheel events considered for velocity
+  const FLICK_MIN_REMAINING = 60; // px — skip if already basically at the section edge
+  const AUTO_SCROLL_DURATION = 550; // ms
+  const AUTO_SCROLL_GRACE_MS = 250; // ignore wheel input right after triggering — it's
+  // almost always the tail end of the same flick gesture, not a new user action
+
+  let wheelSamples = [];
+  let autoScrollRAF = null;
+  let autoScrollActive = false;
+  let autoScrollStartTime = 0;
+
+  function cancelAutoScroll() {
+    if (autoScrollRAF) cancelAnimationFrame(autoScrollRAF);
+    autoScrollRAF = null;
+    autoScrollActive = false;
+  }
+
+  function animateScrollTo(target, duration) {
+    cancelAutoScroll();
+    autoScrollActive = true;
+    autoScrollStartTime = performance.now();
+    const startY = window.scrollY;
+    const distance = target - startY;
+    const startTime = performance.now();
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / duration);
+      window.scrollTo(0, startY + distance * easeOutCubic(t));
+      if (t < 1 && autoScrollActive) {
+        autoScrollRAF = requestAnimationFrame(step);
+      } else {
+        cancelAutoScroll();
+      }
+    }
+    autoScrollRAF = requestAnimationFrame(step);
+  }
+
+  function findActiveSection(scrollY) {
+    return sections.find((section) => {
+      const start = section.el.offsetTop;
+      const height = section.el.offsetHeight;
+      const isLast = section.index === sections.length - 1;
+      return isLast ? scrollY >= start : scrollY >= start && scrollY < start + height;
+    });
+  }
+
+  function handleWheel(e) {
+    const now = performance.now();
+
+    if (autoScrollActive) {
+      // Ignore wheel input for a short grace period — it's almost always the
+      // tail of the same flick that triggered this animation. After that,
+      // treat further input as the user taking back control.
+      if (now - autoScrollStartTime > AUTO_SCROLL_GRACE_MS) {
+        cancelAutoScroll();
+        wheelSamples = [];
+      }
+      return;
+    }
+
+    wheelSamples.push({ t: now, deltaY: e.deltaY });
+    while (wheelSamples.length && now - wheelSamples[0].t > FLICK_SAMPLE_WINDOW) wheelSamples.shift();
+
+    if (wheelSamples.length < 2) return;
+    const totalDelta = wheelSamples.reduce((sum, s) => sum + s.deltaY, 0);
+    const dt = now - wheelSamples[0].t;
+    if (dt <= 0) return;
+    const velocity = totalDelta / dt;
+    if (Math.abs(velocity) < FLICK_VELOCITY_THRESHOLD) return;
+
+    const section = findActiveSection(window.scrollY);
+    if (!section) return;
+
+    const start = section.el.offsetTop;
+    const height = section.el.offsetHeight;
+    const direction = velocity > 0 ? 1 : -1;
+    const target = direction > 0 ? start + height - 2 : start + 2;
+    if (Math.abs(target - window.scrollY) < FLICK_MIN_REMAINING) return;
+
+    wheelSamples = [];
+    animateScrollTo(target, AUTO_SCROLL_DURATION);
+  }
+
+  window.addEventListener('wheel', handleWheel, { passive: true });
+
   // Section indicator navigation
   indicatorEls.forEach((btn) => {
     btn.addEventListener('click', () => {

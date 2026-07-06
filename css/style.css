@@ -80,7 +80,7 @@ body {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(8, 6, 5, 0.25) 0%, rgba(8, 6, 5, 0.4) 55%, rgba(8, 6, 5, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(6, 5, 4, 0.4) 0%, rgba(6, 5, 4, 0.58) 55%, rgba(6, 5, 4, 0.72) 100%);
 }
 
 /* Header */
@@ -97,16 +97,27 @@ body {
   background: linear-gradient(to bottom, rgba(0,0,0,.45), transparent);
 }
 
-.site-header .logo,
+.site-header .logo-badge,
 .site-header .hamburger {
   pointer-events: auto;
 }
 
-.logo {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 2px;
-  color: #fff;
+.logo-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-title);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  text-align: center;
+  color: var(--color-title);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .hamburger {
@@ -254,11 +265,15 @@ body {
 .word-swap {
   position: relative;
   display: inline-block;
-  height: 1em;
   min-width: 2.1em;
-  vertical-align: bottom;
   text-align: center;
-  overflow: hidden;
+}
+
+/* Invisible, normal-flow word that gives the inline-block its real size and
+   baseline (matching the surrounding text metrics exactly) so the absolutely
+   positioned words below line up without manual offsets. */
+.word-sizer {
+  visibility: hidden;
 }
 
 .word-swap .word {
@@ -270,9 +285,9 @@ body {
   animation: wordCycle 6s ease-in-out infinite;
 }
 
-.word-swap .word:nth-child(1) { animation-delay: 0s; }
-.word-swap .word:nth-child(2) { animation-delay: -2s; }
-.word-swap .word:nth-child(3) { animation-delay: -4s; }
+.word-swap .word:nth-child(2) { animation-delay: 0s; }
+.word-swap .word:nth-child(3) { animation-delay: -2s; }
+.word-swap .word:nth-child(4) { animation-delay: -4s; }
 
 @keyframes wordCycle {
   0%   { opacity: 0; transform: translateY(25px); }
@@ -319,7 +334,7 @@ body {
 
 @media (max-width: 640px) {
   .site-header { padding: 16px 18px; }
-  .logo { font-size: 1.15rem; }
+  .logo-badge { width: 38px; height: 38px; font-size: 0.5rem; }
   .section-content { padding: 0 6vw; }
   .section-indicator { left: 10px; bottom: 20px; gap: 6px; }
   .indicator-line { width: 40px; height: 20px; }
@@ -329,6 +344,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .word-swap .word { animation: none; opacity: 1; transform: none; }
-  .word-swap .word:not(:first-child) { display: none; }
+  .word-swap .word { animation: none; opacity: 0; transform: none; }
+  .word-swap .word:nth-child(2) { opacity: 1; }
+  .word-swap .word:nth-child(3),
+  .word-swap .word:nth-child(4) { display: none; }
 }
