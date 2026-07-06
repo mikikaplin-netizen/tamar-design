@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>תמר | עיצוב פנים</title>
+<meta name="description" content="עיצוב פנים מותאם אישית עבורך, מהרעיון ועד להשלמה.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<header class="site-header">
+  <div class="logo">תמר</div>
+  <button class="hamburger" id="hamburger-btn" aria-label="פתח תפריט" aria-expanded="false" aria-controls="menu-overlay">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<nav class="menu-overlay" id="menu-overlay" aria-hidden="true">
+  <ul>
+    <li><a href="#">אודות</a></li>
+    <li><a href="#">פרויקטים</a></li>
+    <li><a href="#">תוכניות</a></li>
+    <li><a href="#">סיפורי לקוחות</a></li>
+  </ul>
+</nav>
+
+<div class="section-indicator" id="section-indicator" role="tablist" aria-label="ניווט בין קטעים">
+  <button class="indicator-line" data-index="0" role="tab" aria-label="קטע 1"><span class="indicator-bar"></span></button>
+  <button class="indicator-line" data-index="1" role="tab" aria-label="קטע 2"><span class="indicator-bar"></span></button>
+  <button class="indicator-line" data-index="2" role="tab" aria-label="קטע 3"><span class="indicator-bar"></span></button>
+  <button class="indicator-line" data-index="3" role="tab" aria-label="קטע 4"><span class="indicator-bar"></span></button>
+  <button class="indicator-line" data-index="4" role="tab" aria-label="קטע 5"><span class="indicator-bar"></span></button>
+</div>
+
+<main class="scroll-stage" id="scroll-stage">
+
+  <section class="stage-section" data-index="0" data-frame-dir="assets/frames/section-1" data-frame-count="76">
+    <div class="section-content hero-content">
+      <h1 class="hero-title">
+        כש<span class="word-swap" aria-hidden="true">
+          <span class="word">דיוק</span><span class="word">חלל</span><span class="word">חלום</span>
+        </span> פוגש יופי
+        <span class="sr-only">כשדיוק פוגש יופי, כשחלל פוגש יופי, כשחלום פוגש יופי</span>
+      </h1>
+      <p class="hero-subtitle">עיצוב פנים מותאם אישית עבורך, מהרעיון ועד להשלמה.</p>
+    </div>
+  </section>
+
+  <section class="stage-section" data-index="1" data-frame-dir="assets/frames/section-2" data-frame-count="76">
+    <div class="section-content">
+      <h2 class="section-title">קונספט</h2>
+      <p class="section-text">רעיון עיצובי מוביל שמספר סיפור</p>
+    </div>
+  </section>
+
+  <section class="stage-section" data-index="2" data-frame-dir="assets/frames/section-3" data-frame-count="76">
+    <div class="section-content">
+      <h2 class="section-title">חומרים</h2>
+      <p class="section-text">בחירה מדויקת של גימור, עץ ובד</p>
+    </div>
+  </section>
+
+  <section class="stage-section" data-index="3" data-frame-dir="assets/frames/section-4" data-frame-count="76">
+    <div class="section-content">
+      <h2 class="section-title">ביצוע</h2>
+      <p class="section-text">ליווי צמוד בשטח עד לפרט האחרון</p>
+    </div>
+  </section>
+
+  <section class="stage-section" data-index="4" data-frame-dir="assets/frames/section-5" data-frame-count="76">
+    <div class="section-content">
+      <h2 class="section-title">מסירה</h2>
+      <p class="section-text">בית חדש, בדיוק כפי שדמיינתם</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/main.js"></script>
+</body>
+</html>
