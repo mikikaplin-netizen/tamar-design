@@ -43,6 +43,8 @@
     canvas.style.width = window.innerWidth + 'px';
     canvas.style.height = window.innerHeight + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
   }
 
   function drawImageCover(img) {
@@ -60,12 +62,31 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  function fadeFactor(progress, isFirst, isLast) {
-    const FADE_IN_END = 0.12;
-    const FADE_OUT_START = 0.88;
-    if (!isFirst && progress < FADE_IN_END) return progress / FADE_IN_END;
-    if (!isLast && progress > FADE_OUT_START) return (1 - progress) / (1 - FADE_OUT_START);
-    return 1;
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function easeInCubic(t) {
+    return t * t * t;
+  }
+
+  // Returns how the fixed text block should look for a given scroll progress
+  // (0-1) through its section: it fades and slides gently into its resting
+  // spot, holds still while the section is active, then fades out the same way.
+  function textStateFor(progress, isFirst, isLast) {
+    const ENTRY_END = 0.15;
+    const EXIT_START = 0.85;
+    const SLIDE_PX = 28;
+
+    if (!isFirst && progress < ENTRY_END) {
+      const eased = easeOutCubic(progress / ENTRY_END);
+      return { opacity: eased, translateY: (1 - eased) * SLIDE_PX };
+    }
+    if (!isLast && progress > EXIT_START) {
+      const eased = easeInCubic((progress - EXIT_START) / (1 - EXIT_START));
+      return { opacity: 1 - eased, translateY: -eased * SLIDE_PX };
+    }
+    return { opacity: 1, translateY: 0 };
   }
 
   let lastDrawnImage = null;
@@ -96,11 +117,14 @@
         }
         if (section.contentEl) {
           const isFirst = section.index === 0;
-          const isLast = section.index === sections.length - 1;
-          section.contentEl.style.opacity = String(fadeFactor(progress, isFirst, isLast));
+          const state = textStateFor(progress, isFirst, isLast);
+          section.contentEl.style.opacity = String(state.opacity);
+          section.contentEl.style.transform = `translateY(${state.translateY}px)`;
+          section.contentEl.style.visibility = state.opacity > 0.01 ? 'visible' : 'hidden';
         }
       } else if (section.contentEl) {
         section.contentEl.style.opacity = '0';
+        section.contentEl.style.visibility = 'hidden';
       }
     });
 

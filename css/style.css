@@ -1,8 +1,40 @@
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../assets/fonts/GoogleSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../assets/fonts/GoogleSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../assets/fonts/GoogleSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('../assets/fonts/GoogleSans-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --color-title: #b4916b;
   --color-subtitle: #ffffff;
-  --font-display: 'Frank Ruhl Libre', serif;
-  --font-body: 'Heebo', sans-serif;
+  --font-display: 'Google Sans', sans-serif;
+  --font-body: 'Google Sans', sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -40,6 +72,15 @@ body {
   z-index: 0;
   display: block;
   background: #0a0806;
+}
+
+/* Subtle scrim between the video canvas and the text, for legibility */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8, 6, 5, 0.25) 0%, rgba(8, 6, 5, 0.4) 55%, rgba(8, 6, 5, 0.5) 100%);
 }
 
 /* Header */
@@ -186,16 +227,19 @@ body {
 }
 
 .section-content {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-end;
+  align-items: flex-start;
   text-align: right;
   padding: 0 8vw;
-  will-change: opacity;
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity, transform;
 }
 
 .hero-title {
@@ -241,11 +285,18 @@ body {
 .hero-subtitle {
   color: var(--color-subtitle);
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1rem, 2.2vw, 1.4rem);
   max-width: 36ch;
+  width: 100%;
   line-height: 1.6;
   margin: 0;
+}
+
+@media (min-width: 641px) {
+  .hero-subtitle {
+    max-width: none;
+  }
 }
 
 .section-title {
@@ -259,7 +310,7 @@ body {
 .section-text {
   color: var(--color-subtitle);
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1rem, 2vw, 1.3rem);
   max-width: 34ch;
   line-height: 1.6;
