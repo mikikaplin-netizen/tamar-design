@@ -1,6 +1,8 @@
 (function () {
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
+  const scrim = document.querySelector('.scrim');
+  const indicatorContainer = document.getElementById('section-indicator');
   const sectionEls = Array.from(document.querySelectorAll('.stage-section'));
   const indicatorEls = Array.from(document.querySelectorAll('.indicator-line'));
 
@@ -105,7 +107,7 @@
   // Returns how the fixed text block should look for a given scroll progress
   // (0-1) through its section: it fades and slides gently into its resting
   // spot, holds still while the section is active, then fades out the same way.
-  function textStateFor(progress, isFirst, isLast) {
+  function textStateFor(progress, isFirst) {
     const ENTRY_END = 0.15;
     const EXIT_START = 0.4;
     const EXIT_END = 0.7;
@@ -115,7 +117,7 @@
       const eased = easeOutCubic(progress / ENTRY_END);
       return { opacity: eased, translateY: (1 - eased) * SLIDE_PX };
     }
-    if (!isLast && progress > EXIT_START) {
+    if (progress > EXIT_START) {
       const t = Math.min(1, (progress - EXIT_START) / (EXIT_END - EXIT_START));
       return { opacity: 1 - t, translateY: -t * SLIDE_PX };
     }
@@ -126,10 +128,20 @@
   let activeIndex = -1;
   let ticking = false;
 
+  // Once the user scrolls past the end of the last section, the video
+  // journey is over — fade the canvas/scrim/section-indicator out over the
+  // tail of that last section instead of leaving a frozen frame behind
+  // forever while the page content (e.g. the packages section) continues.
+  // Finishing at 0.95 rather than 1.0 leaves a small margin so the fade
+  // reliably completes even if the max scrollable distance is tight.
+  const OUTRO_START = 0.75;
+  const OUTRO_END = 0.95;
+
   function update() {
     ticking = false;
     const scrollY = window.scrollY;
     let newActive = activeIndex;
+    let lastSectionProgress = 0;
 
     sections.forEach((section) => {
       const start = section.el.offsetTop;
@@ -140,6 +152,7 @@
       if (within) {
         newActive = section.index;
         const progress = Math.min(1, Math.max(0, (scrollY - start) / height));
+        if (isLast) lastSectionProgress = progress;
         const frameIndex = Math.min(section.frameCount - 1, Math.floor(progress * section.frameCount));
         const img = section.images[frameIndex];
         if (img && img.complete && img.naturalWidth) {
@@ -150,7 +163,7 @@
         }
         if (section.contentEl) {
           const isFirst = section.index === 0;
-          const state = textStateFor(progress, isFirst, isLast);
+          const state = textStateFor(progress, isFirst);
           section.contentEl.style.opacity = String(state.opacity);
           section.contentEl.style.transform = `translateY(${state.translateY}px)`;
           section.contentEl.style.visibility = state.opacity > 0.01 ? 'visible' : 'hidden';
@@ -160,6 +173,17 @@
         section.contentEl.style.visibility = 'hidden';
       }
     });
+
+    const outroT = Math.max(0, Math.min(1, (lastSectionProgress - OUTRO_START) / (OUTRO_END - OUTRO_START)));
+    const outroOpacity = String(1 - outroT);
+    canvas.style.opacity = outroOpacity;
+    if (scrim) scrim.style.opacity = outroOpacity;
+    if (indicatorContainer) {
+      indicatorContainer.style.opacity = outroOpacity;
+      const hidden = outroT >= 0.999;
+      indicatorContainer.style.visibility = hidden ? 'hidden' : 'visible';
+      indicatorContainer.style.pointerEvents = hidden ? 'none' : 'auto';
+    }
 
     if (newActive !== activeIndex) {
       activeIndex = newActive;
@@ -233,12 +257,14 @@
     autoScrollRAF = requestAnimationFrame(step);
   }
 
+  // Bounded on both ends (unlike update()'s open-ended last-section check) so
+  // the flick-to-complete behavior naturally stops applying once the user has
+  // scrolled past the whole video journey into the page content that follows.
   function findActiveSection(scrollY) {
     return sections.find((section) => {
       const start = section.el.offsetTop;
       const height = section.el.offsetHeight;
-      const isLast = section.index === sections.length - 1;
-      return isLast ? scrollY >= start : scrollY >= start && scrollY < start + height;
+      return scrollY >= start && scrollY < start + height;
     });
   }
 
@@ -287,6 +313,20 @@
       const idx = parseInt(btn.dataset.index, 10);
       const target = sections[idx].el.offsetTop;
       window.scrollTo({ top: target + 2, behavior: 'smooth' });
+    });
+  });
+
+  // In-page anchor links (e.g. the "תוכניות" nav item -> #packages) scroll
+  // smoothly to their target. Placeholder links (href="#") have no matching
+  // element and are safely ignored.
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    const targetId = link.getAttribute('href').slice(1);
+    if (!targetId) return;
+    const targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 

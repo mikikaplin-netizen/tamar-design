@@ -72,6 +72,7 @@ body {
   z-index: 0;
   display: block;
   background: #0a0806;
+  pointer-events: none;
 }
 
 /* Subtle scrim between the video canvas and the text, for legibility */
@@ -377,8 +378,15 @@ body {
   font-weight: 400;
   font-size: clamp(1rem, 2vw, 1.3rem);
   max-width: 34ch;
+  width: 100%;
   line-height: 1.6;
   margin: 0;
+}
+
+@media (min-width: 641px) {
+  .section-text {
+    max-width: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -401,4 +409,88 @@ body {
   .word-swap .word:nth-child(2) { opacity: 1; }
   .word-swap .word:nth-child(3),
   .word-swap .word:nth-child(4) { display: none; }
+}
+
+/* Packages / plans section — regular page content after the video journey */
+.packages-section {
+  position: relative;
+  z-index: 20;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #0a0806;
+  padding: 110px 8vw 100px;
+  text-align: right;
+  scroll-margin-top: 100px;
+}
+
+.packages-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.packages-heading {
+  font-family: var(--font-display);
+  color: var(--color-title);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+
+.packages-subheading {
+  font-family: var(--font-body);
+  color: var(--color-subtitle);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  max-width: 60ch;
+  line-height: 1.6;
+  margin: 0 0 56px;
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.package-card {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 32px 28px;
+  transition: border-color .3s ease, transform .3s ease, background-color .3s ease;
+}
+
+.package-card:hover {
+  border-color: var(--color-title);
+  background: rgba(180, 145, 107, 0.06);
+  transform: translateY(-4px);
+}
+
+.package-card h3 {
+  font-family: var(--font-display);
+  color: var(--color-title);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.package-card p {
+  font-family: var(--font-body);
+  color: var(--color-subtitle);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.packages-cta {
+  margin-top: 56px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 640px) {
+  .packages-section { padding: 80px 6vw 70px; }
+  .packages-subheading { margin-bottom: 36px; }
+  .package-card { padding: 24px 20px; }
+  .packages-cta { margin-top: 36px; }
 }
