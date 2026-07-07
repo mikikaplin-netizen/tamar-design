@@ -3,8 +3,6 @@
   const ctx = canvas.getContext('2d');
   const sectionEls = Array.from(document.querySelectorAll('.stage-section'));
   const indicatorEls = Array.from(document.querySelectorAll('.indicator-line'));
-  const hamburgerBtn = document.getElementById('hamburger-btn');
-  const menuOverlay = document.getElementById('menu-overlay');
 
   const sections = sectionEls.map((el, i) => ({
     el,
@@ -292,33 +290,4 @@
     });
   });
 
-  // Hamburger menu
-  function openMenu() {
-    hamburgerBtn.setAttribute('aria-expanded', 'true');
-    menuOverlay.classList.add('open');
-    menuOverlay.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeMenu() {
-    hamburgerBtn.setAttribute('aria-expanded', 'false');
-    menuOverlay.classList.remove('open');
-    menuOverlay.setAttribute('aria-hidden', 'true');
-  }
-
-  hamburgerBtn.addEventListener('click', () => {
-    const isOpen = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-    if (isOpen) closeMenu();
-    else openMenu();
-  });
-
-  menuOverlay.querySelectorAll('a').forEach((a) => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      closeMenu();
-    });
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-  });
 })();
