@@ -144,7 +144,7 @@ body {
 .hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-/* Fullscreen menu overlay */
+/* Fullscreen menu overlay, content anchored near the top */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -153,16 +153,46 @@ body {
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 130px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity .4s ease, visibility 0s .4s;
+  transform: translateY(-16px);
+  transition: opacity .35s ease, visibility 0s .35s, transform .35s ease;
 }
 
 .menu-overlay.open {
   opacity: 1;
   visibility: visible;
+  transform: translateY(0);
   transition-delay: 0s;
+}
+
+.menu-phone {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-title);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-title);
+  transition: background-color .3s ease, color .3s ease, transform .3s ease;
+}
+
+.menu-phone svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-phone:hover,
+.menu-phone:focus-visible {
+  background: var(--color-title);
+  color: #0a0806;
+  transform: translateY(-2px);
 }
 
 .menu-overlay ul {
@@ -403,6 +433,9 @@ body {
   .indicator-bar { width: 18px; }
   .indicator-line.active .indicator-bar { width: 32px; }
   .word-swap { min-width: 1.9em; }
+  .menu-overlay { padding-top: 100px; }
+  .menu-phone { top: 18px; left: 18px; width: 40px; height: 40px; }
+  .menu-phone svg { width: 18px; height: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
